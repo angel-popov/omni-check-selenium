@@ -1,0 +1,7 @@
+{-# LANGUAGE OverloadedStrings #-}
+module Config where
+import Data.Text
+appId = "someappid" :: Text
+globalPassword = "globalpass" :: Text
+apiKey = "apikeyfromnexmo" :: Text
+apiSecret = "apisecret from nexmo" :: Text
