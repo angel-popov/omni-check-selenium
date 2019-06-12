@@ -28,6 +28,8 @@ library:
     - base
     - webdriver
     - text
+    - async
+    - time
 executables:
   omni-selenium-exe:
     main:                Main.hs
