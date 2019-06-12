@@ -9,6 +9,7 @@ import Test.WebDriver.Commands.Wait
 import Test.WebDriver.JSON (ignoreReturn)
 import qualified Config as C
 import Control.Concurrent.Async
+
 type User = Text
 
 chromeConfig :: WDConfig
@@ -42,4 +43,9 @@ sendMessage user msg toUser = do
 checkOmni :: IO()
 checkOmni = do
   time <- (pack.show)<$> getCurrentTime
-  mapConcurrently_ (\wd -> session >>= flip runWD wd) [loginUMP,sendMessage "u1" time "u2" ,sendMessage "u2" time "u1"]
+  all <- mapConcurrently (\wd -> do
+                             s <- session
+                             runWD s wd
+                             return s) [loginUMP,sendMessage "u1" time "u2" ,sendMessage "u2" time "u1"]
+  mapM (flip runWD closeSession) all
+  return ()
