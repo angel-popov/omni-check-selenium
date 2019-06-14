@@ -71,7 +71,7 @@ assignUsersToC = do
   (findElem (ById "w-select-all-users-btn")) >>= click
   (findElem (ById "wAddSelectedUsers")) >>= click
   (findElem (ByXPath "//span/button[contains(text(),'Finish')]")) >>= click
-  (waitUntil 10 (findElem (ByXPath "//span[contains(text(),'Launch the web app')]")))
+  (waitUntil 20 (findElem (ByXPath "//span[contains(text(),'Launch the web app')]")))
   (findElem (ByXPath "//div/div[2]/div/div/div[2]")) >>= getText
   
 createNewApp :: WD(Text)
