@@ -11,7 +11,7 @@ import qualified Config as C
 import Control.Concurrent.Async
 
 type User = Text
-type AppId = Text
+newtype AppId = AppId Text
 chromeConfig :: WDConfig
 chromeConfig = useBrowser chr defaultConfig
   { wdHost = "0.0.0.0", wdPort = 4444, wdHTTPRetryCount = 50 }
@@ -65,16 +65,16 @@ createConversation = do
   return ()
   
 
-assignUsersToC :: WD(Text)
+assignUsersToC :: WD(AppId)
 assignUsersToC = do
   (findElem (ById "wToggleDropdownButton")) >>= click
   (findElem (ById "w-select-all-users-btn")) >>= click
   (findElem (ById "wAddSelectedUsers")) >>= click
   (findElem (ByXPath "//span/button[contains(text(),'Finish')]")) >>= click
   (waitUntil 50 (findElem (ByXPath "//span[contains(text(),'Launch the web app')]")))
-  (findElem (ByXPath "//div/div[2]/div/div/div[2]")) >>= getText
+  (findElem (ByXPath "//div/div[2]/div/div/div[2]")) >>= (AppId <$>). getText -- appid
   
-createNewApp :: WD(Text)
+createNewApp :: WD(AppId)
 createNewApp = do
   loginUMP
   createApp
@@ -83,9 +83,8 @@ createNewApp = do
   createConversation
   assignUsersToC
 
-
 sendMessage :: AppId -> User -> Text -> User -> WD()
-sendMessage appId user msg toUser = do
+sendMessage (AppId appId) user msg toUser = do
   (openPage "https://nexmo-omni-channel.geeks-lab.net/cs/app")
   (findElem (ById "username")) >>= sendKeys user
   (findElem (ById "password")) >>= sendKeys C.globalPassword
@@ -102,6 +101,8 @@ checkOmni = do
   all <- mapConcurrently (\wd -> do
                              s <- session
                              runWD s wd
-                             return s) [ sendMessage appId "u1" time "u2" ,sendMessage appId "u2" time "u1"]
+                             return s)
+    [ sendMessage appId "u1" time "u2" ,
+      sendMessage appId "u2" time "u1"]
   mapConcurrently (flip runWD closeSession) (admin:all)
   return ()
